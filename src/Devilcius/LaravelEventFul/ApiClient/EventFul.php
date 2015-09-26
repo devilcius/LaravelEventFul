@@ -113,9 +113,9 @@ class EventFul
         $url = $this->apiRoot . '/rest/' . $method;
         $this->requestUri = $url;
         $postArgs = [
-                'appKey' => $this->appKey,
+                'app_key' => $this->appKey,
                 'user' => $this->user,
-                'userKey' => $this->userKey,
+                'user_key' => $this->userKey,
         ];
         foreach($args as $argKey => $argValue) {
             if(is_array($argValue)) {
@@ -128,7 +128,7 @@ class EventFul
         }
         $fieldsString = '';
         foreach($postArgs as $argKey => $argValue) {
-            $fieldsString .= $key . '=' . urlencode($argValue) . '&';
+            $fieldsString .= $argKey . '=' . urlencode($argValue) . '&';
         }
         $fieldsString = rtrim($fieldsString, '&');
         $ch = curl_init();
