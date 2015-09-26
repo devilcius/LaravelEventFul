@@ -110,7 +110,7 @@ class EventFul
     public function call($method, $args = [])
     {
         $method = trim($method, '/ ');
-        $url = $this->apiRoot . '/rest/' . $method;
+        $url = $this->apiRoot . '/json/' . $method;
         $this->requestUri = $url;
         $postArgs = [
                 'app_key' => $this->appKey,
