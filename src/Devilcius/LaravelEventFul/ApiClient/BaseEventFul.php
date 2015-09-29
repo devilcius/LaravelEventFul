@@ -3,7 +3,6 @@
 namespace Devilcius\LaravelEventFul\ApiClient;
 
 use Illuminate\Support\Facades\Config;
-use SimpleXMLElement;
 
 
 /**
@@ -11,7 +10,7 @@ use SimpleXMLElement;
  *
  * @author Marcos Peña
  */
-class EventFul
+class BaseEventFul
 {
 
     /**
@@ -105,7 +104,7 @@ class EventFul
      * @param string $method
      * @param mixed  $args
      *
-     * @return SimpleXMLElement
+     * @return JsonObject
      */
     public function call($method, $args = [])
     {
@@ -138,15 +137,25 @@ class EventFul
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return data instead of display to std out
         $cResult = curl_exec($ch);
         $this->responseData = $cResult;
-        curl_close($ch);
-// Process result to XML
-        $data = new SimpleXMLElement($cResult);
-        if($data->getName() === 'error') {
-            $error = $data['string'] . ': ' . $data->description;
-            $code = $data['string'];
-            return false;
-        }
-        return $data;
+
+        return json_decode($cResult);
     }
 
+	/*
+	 * Used to return the correct package to allow access to the api calls for that package
+	 * @access public
+	 * @return class
+	 */
+	public function getPackage($name) {
+
+		if ( $name === 'event' ) {
+			$className = 'Devilcius\LaravelEventFul\ApiClient\EventFul'.ucfirst($name);
+
+			return new $className();
+		}
+		else {
+			throw new RunTimeException('The package provided invalid');
+		}
+	}    
+    
 }
