@@ -21,16 +21,16 @@ class EventFulEvent extends BaseEventFul
     {
         // Check for required variables
         if (!empty($options['location'])) {
-            $options['page_size'] = 25;
-            $options['page_number'] = 1;
             $response = $this->call($this->call, $options);
-            if (!$response) {
+            if (!is_object($response)) {
+                
+                throw new \RuntimeException("Wrong response");
+            }
+            if($response->events === null) {
+                //No events found for this location;
                 return false;
             }
-            if(!$response) {
-                return;
-            }
-            $events['currentPage'] = (string) $response->page_number;
+            $events['currentPage'] = (string) $response->page_number;            
             $events['totalPages'] = (string) $response->page_count;
             $events['totalResults'] = (string) $response->total_items;
             $i = 0;
@@ -41,14 +41,17 @@ class EventFulEvent extends BaseEventFul
                 $events['events'][$i]['id'] = (string) $event->id;
                 $events['events'][$i]['title'] = (string) $event->title;
                 $ii = 0;
-                if (!$event->performers) { //often artist name is included in title, and performers is null
-                    $events['events'][$i]['artists'][0] = $event->title;
+                if (!$event->performers) { //often artist name is included in title, and $event->performers is null
+                    $events['events'][$i]['artists'][0] = str_replace(strtolower($options['location']), "", strtolower($event->title));
                 } else {
                     foreach ($event->performers as $artist) {
-                        if (!is_object($artist)) {
-                            $events['events'][$i]['artists'][$ii] = null;
-                        }
-                        $events['events'][$i]['artists'][$ii] = (string) $artist->name;
+                        if(is_object($artist)) {
+                            $events['events'][$i]['artists'][$ii] = (string) $artist->name;
+                        } elseif(is_array($artist)) { //more than one artist name synthax
+                            $events['events'][$i]['artists'][$ii] = (string) $artist[0]->name;
+                        } else {
+                            $events['events'][$i]['artists'][$ii] = $artist;
+                        }                        
                         $ii++;
                     }
                 }
@@ -65,17 +68,6 @@ class EventFulEvent extends BaseEventFul
                 $events['events'][$i]['startDate'] = $events['events'][$i]['startTime'];
                 $events['events'][$i]['description'] = (string) $event->description;
                 $events['events'][$i]['attendance'] = (string) $event->going_count;
-                if (is_object($event->image)) {
-                    if (is_object($event->image->small)) {
-                        $events['events'][$i]['image']['small'] = (string) $event->image->small->url;
-                    }
-                    if (is_object($event->image->medium)) {
-                        $events['events'][$i]['image']['medium'] = (string) $event->image->medium->url;
-                    }
-                    if (is_object($event->image->thumb)) {
-                        $events['events'][$i]['image']['thumb'] = (string) $event->image->thumb->url;
-                    }
-                }
                 $events['events'][$i]['url'] = (string) $event->url;
                 $i++;
             }
