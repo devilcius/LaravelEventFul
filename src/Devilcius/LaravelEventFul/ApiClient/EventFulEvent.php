@@ -27,11 +27,17 @@ class EventFulEvent extends BaseEventFul
             if (!$response) {
                 return false;
             }
+            if(!$response) {
+                return;
+            }
             $events['currentPage'] = (string) $response->page_number;
             $events['totalPages'] = (string) $response->page_count;
             $events['totalResults'] = (string) $response->total_items;
             $i = 0;
             foreach ($response->events->event as $event) {
+                if (!is_object($event)) {
+                    continue;
+                }
                 $events['events'][$i]['id'] = (string) $event->id;
                 $events['events'][$i]['title'] = (string) $event->title;
                 $ii = 0;
@@ -39,6 +45,9 @@ class EventFulEvent extends BaseEventFul
                     $events['events'][$i]['artists'][0] = $event->title;
                 } else {
                     foreach ($event->performers as $artist) {
+                        if (!is_object($artist)) {
+                            $events['events'][$i]['artists'][$ii] = null;
+                        }
                         $events['events'][$i]['artists'][$ii] = (string) $artist->name;
                         $ii++;
                     }
@@ -56,10 +65,16 @@ class EventFulEvent extends BaseEventFul
                 $events['events'][$i]['startDate'] = $events['events'][$i]['startTime'];
                 $events['events'][$i]['description'] = (string) $event->description;
                 $events['events'][$i]['attendance'] = (string) $event->going_count;
-                if ($event->image) {
-                    $events['events'][$i]['image']['small'] = (string) $event->image->small->url;
-                    $events['events'][$i]['image']['medium'] = (string) $event->image->medium->url;
-                    $events['events'][$i]['image']['thumb'] = (string) $event->image->thumb->url;
+                if (is_object($event->image)) {
+                    if (is_object($event->image->small)) {
+                        $events['events'][$i]['image']['small'] = (string) $event->image->small->url;
+                    }
+                    if (is_object($event->image->medium)) {
+                        $events['events'][$i]['image']['medium'] = (string) $event->image->medium->url;
+                    }
+                    if (is_object($event->image->thumb)) {
+                        $events['events'][$i]['image']['thumb'] = (string) $event->image->thumb->url;
+                    }
                 }
                 $events['events'][$i]['url'] = (string) $event->url;
                 $i++;
