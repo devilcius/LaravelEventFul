@@ -47,7 +47,7 @@ class EventFulEvent extends BaseEventFul
                     foreach ($event->performers as $artist) {
                         if(is_object($artist)) {
                             $events['events'][$i]['artists'][$ii] = (string) $artist->name;
-                        } elseif(is_array($artist)) { //more than one artist name synthax
+                        } elseif(is_array($artist)) { //same artist, different name synthax
                             $events['events'][$i]['artists'][$ii] = (string) $artist[0]->name;
                         } else {
                             $events['events'][$i]['artists'][$ii] = $artist;
